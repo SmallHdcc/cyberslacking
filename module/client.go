@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"runtime"
 	"strings"
 )
 
@@ -28,15 +29,14 @@ func ClientStart() {
 	fmt.Println("tcp address", tcpAddress)
 	conn, err = net.DialTCP("tcp", nil, tcpAddress)
 	if err != nil {
-		fmt.Println("failed to connect server:", err)
+		fmt.Println("连接服务器失败:", err)
 		return
 	}
 	fmt.Println("Connected to server:", conn.RemoteAddr())
-	fmt.Println("Input /help to get more info about command")
-	// get the key
+	fmt.Println("输入 '/help' 查看帮助信息！")
+	// get the key 获得从服务端传来的密钥
 	conn.Read(Key)
-	fmt.Println(Key)
-	fmt.Println("Established Secure Connection !!!")
+	fmt.Println("建立了与服务器的安全连接 !!!")
 	go ListenBroadcast()
 	go ListenUserInput()
 	pause()
@@ -83,7 +83,13 @@ func ListenUserInput() {
 
 // TODO
 func ParseCommand() {
-	command := string(HistoryMessage[1 : HistoryMessageLength-1])
+	//判断操作系统是
+	var command string
+	if runtime.GOOS == "windows" {
+		command = string(HistoryMessage[1 : HistoryMessageLength-2])
+	} else {
+		command = string(HistoryMessage[1 : HistoryMessageLength-1])
+	}
 	words := strings.Split(command, " ")
 	switch words[0] {
 	case "quit":
